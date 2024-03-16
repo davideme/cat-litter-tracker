@@ -7,13 +7,26 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-import {onRequest} from "firebase-functions/v2/https";
-import * as logger from "firebase-functions/logger";
+import * as functions from 'firebase-functions';
+import express from 'express';
+import admin from 'firebase-admin';
 
-// Start writing functions
-// https://firebase.google.com/docs/functions/typescript
+admin.initializeApp();
 
-// export const helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+const app = express();
+const db = admin.firestore();
+
+app.use(express.json());
+
+app.get('/lastChanged', async (req: express.Request, res: express.Response) => {
+  const snapshot = await db.collection('litterChanges').doc('lastChange').get();
+  res.json({ lastChanged: snapshot.data()?.date || null });
+});
+
+app.post('/changeLitter', async (req: express.Request, res: express.Response) => {
+  const lastChanged: Date = new Date();
+  await db.collection('litterChanges').doc('lastChange').set({ date: lastChanged });
+  res.json({ success: true, lastChanged });
+});
+
+exports.app = functions.https.onRequest(app);
