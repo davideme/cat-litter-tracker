@@ -15,19 +15,6 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <h1>Cat Litter Tracker</h1>
   <button id="changeLitter">Change Litter</button>
   <p>Last changed: <span id="lastChanged">Not yet changed</span></p>
-
-  <script type="module" src="/src/main.ts"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.1/firebase-functions.js"></script>
-  <script>
-      // Initialize Firebase
-      const firebaseConfig = {
-          // Your Firebase configuration
-      };
-      firebase.initializeApp(firebaseConfig);
-
-      const functions = firebase.functions();
-  </script>
 `
 
 setupChangeLitter(
