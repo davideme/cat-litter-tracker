@@ -57,7 +57,7 @@ function onUserSignedIn(user: User) {
 
   async function setLastChanged(element: HTMLSpanElement) {
     try {
-      const idToken = await firebase.auth().currentUser?.getIdToken(true);
+      const idToken = await user.getIdToken();
       const result = await (await fetch('https://us-central1-cat-litter-tracker-app.cloudfunctions.net/app/lastChanged', {
         headers: {
           'Authorization': 'Bearer ' + idToken
