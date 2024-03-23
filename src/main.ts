@@ -6,7 +6,7 @@ import { getFunctions } from "firebase/functions";
 import { httpsCallable } from "firebase/functions";
 import { ChangeLitterData, ChangeLitterResponse } from "../shared/functions";
 import firebase from "firebase/compat/app";
-import * as firebaseui from "firebaseui";
+import firebaseui from "firebaseui";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, User } from "firebase/auth";
 
 const app = initializeApp(firebaseConfig);
