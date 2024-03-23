@@ -54,6 +54,7 @@ function onUserSignedIn(user: User) {
     document.querySelector<HTMLButtonElement>('#changeLitter')!,
     document.querySelector<HTMLSpanElement>('#lastChanged')!,
     document.querySelector<HTMLDivElement>('#loader')!);
+  setLastChanged(document.querySelector<HTMLSpanElement>('#lastChanged')!);
 
   async function setLastChanged(element: HTMLSpanElement) {
     try {
