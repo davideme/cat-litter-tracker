@@ -46,17 +46,25 @@ app.get("/lastChanged", async (
 
 app.post("/changeLitter", async (
   req: express.Request,
-  res: express.Response<{data: ChangeLitterResponse}>) => {
-  const lastChanged: Date = new Date();
-  await db.collection("litterChanges")
-    .doc("lastChange")
-    .set({date: lastChanged});
+  res: express.Response<{data: ChangeLitterResponse | string}>) => {
+  const idToken = req.headers.authorization?.split("Bearer ")[1] || "";
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const userId = decodedToken.uid;
+    console.log(`User ${userId} has changed the litter`);
+    const lastChanged: Date = new Date();
+    await db.collection("litterChanges")
+      .doc("lastChange")
+      .set({date: lastChanged});
 
-  const response: ChangeLitterResponse = {
-    success: true,
-    lastChanged,
-  };
-  res.json({data: response});
+    const response: ChangeLitterResponse = {
+      success: true,
+      lastChanged,
+    };
+    res.json({data: response});
+  } catch (error) {
+    res.status(401).send({data: "Unauthorized"});
+  }
 });
 
 exports.app = functions.https.onRequest(app);
