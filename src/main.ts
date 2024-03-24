@@ -7,12 +7,14 @@ import { httpsCallable } from "firebase/functions";
 import { ChangeLitterData, ChangeLitterResponse } from "../shared/functions";
 import firebase from "firebase/compat/app";
 import * as firebaseui from "firebaseui";
-import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, User } from "firebase/auth";
+import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, User, connectAuthEmulator } from "firebase/auth";
 
 const app = initializeApp(firebaseConfig);
 // const analytics = getAnalytics(app);
 const functions = getFunctions(app);
 const auth = getAuth(app);
+connectAuthEmulator(auth, "http://127.0.0.1:9099");
+
 setPersistence(auth, browserLocalPersistence);
 const changeLitter = httpsCallable<ChangeLitterData, ChangeLitterResponse>(functions, 'app/changeLitter');
 
