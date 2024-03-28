@@ -74,6 +74,8 @@ function onUserSignedIn(user: User) {
     const householdName = (await fetchOwnedHousehold(user))[0].name ?? 'My household';
     const householdNameElement = document.querySelector<HTMLHeadingElement>('#householdName')!;
     householdNameElement.textContent = householdName;
+    const addHouseholdElement = document.querySelector<HTMLButtonElement>('#addHousehold')!;
+    addHouseholdElement.disabled = true;
   }
 
 
