@@ -6,7 +6,7 @@ import firebase from "firebase/compat/app";
 import * as firebaseui from "firebaseui";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, User, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
-import { addCatsToHousehold, addHouseholdToFirestore, addLitterEvent, fetchCatsOfHousehold, fetchOwnedHousehold } from './api';
+import { addCatsToHousehold, addHousehold, addLitterEvent, fetchCatsOfHousehold, fetchOwnedHousehold } from './api';
 
 const app = initializeApp(firebaseConfig);
 // const analytics = getAnalytics(app);
@@ -61,7 +61,7 @@ async function onUserSignedIn(user: User) {
   setLastChanged(document.querySelector<HTMLSpanElement>('#lastChanged')!);
 
   document.querySelector<HTMLButtonElement>('#addHousehold')!.addEventListener('click', async () => {
-    const householdId = await addHouseholdToFirestore(db, { name: 'My Household', roles: { [user.uid]: 'owner' } });
+    const householdId = await addHousehold(db, { name: 'My Household', roles: { [user.uid]: 'owner' } });
     await addCatsToHousehold(db, householdId, [{ name: 'Yoda' }]);
   });
 

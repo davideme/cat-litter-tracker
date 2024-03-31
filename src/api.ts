@@ -15,7 +15,7 @@ export async function fetchOwnedHousehold(db: Firestore, user: User): Promise<{ 
     return ownedHouseholds;
 }
 
-export async function addHouseholdToFirestore(db: Firestore, household: { name: string, roles: { [userId: string]: string } }): Promise<string> {
+export async function addHousehold(db: Firestore, household: { name: string, roles: { [userId: string]: string } }): Promise<string> {
     const householdsCollection = collection(db, "households");
     const newHouseholdDoc = doc(householdsCollection);
     try {
