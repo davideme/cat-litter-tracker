@@ -22,9 +22,16 @@ service cloud.firestore {
           return resource == null && isOneOfRoles(request.resource, ['owner']);
         }
 
-        // Owners can read, write, and delete stories
+        // Owners can read, write
         allow write: if isValidNewHousehold() || isOneOfRoles(resource, ['owner']);
         allow read: if isOneOfRoles(resource, ['owner']);
+
+        match /cats/{cat} {
+          allow read, write: if isOneOfRoles(get(/databases/$(database)/documents/households/$(household)), ['owner']);
+          match /litterEvents/{litterEvent} {
+            allow read, write: if isOneOfRoles(get(/databases/$(database)/documents/households/$(household)), ['owner']);
+          }
+        }
      }
    }
 }
