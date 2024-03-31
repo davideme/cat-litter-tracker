@@ -5,8 +5,8 @@ import firebaseConfig from "./firebaseConfig";
 import firebase from "firebase/compat/app";
 import * as firebaseui from "firebaseui";
 import { getAuth, onAuthStateChanged, setPersistence, browserLocalPersistence, User, connectAuthEmulator } from "firebase/auth";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
-import { addCatsToHousehold, addHousehold, addLitterEvent, fetchCatsOfHousehold, fetchOwnedHousehold } from './api';
+import { getFirestore, connectFirestoreEmulator, DocumentReference } from "firebase/firestore";
+import { addCatsToHousehold, addHousehold, addLitterEvent, fetchCatsOfHousehold, fetchMostRecentLitterEvents, fetchOwnedHousehold } from './api';
 
 const app = initializeApp(firebaseConfig);
 // const analytics = getAnalytics(app);
@@ -54,20 +54,20 @@ async function onUserSignedIn(user: User) {
     <p>Last changed: <span id="lastChanged">Not yet changed</span></p>
   `;
 
+  const household = (await fetchOwnedHousehold(db, user))[0]
+  fetchHouseholdName(household.name ?? 'My household');
+  const cat = (await fetchCatsOfHousehold(db, household.id))[0];
+
   setupChangeLitter(
     document.querySelector<HTMLButtonElement>('#changeLitter')!,
     document.querySelector<HTMLSpanElement>('#lastChanged')!,
     document.querySelector<HTMLDivElement>('#loader')!);
-  setLastChanged(document.querySelector<HTMLSpanElement>('#lastChanged')!);
+  setLastChanged(cat, document.querySelector<HTMLSpanElement>('#lastChanged')!);
 
   document.querySelector<HTMLButtonElement>('#addHousehold')!.addEventListener('click', async () => {
     const householdId = await addHousehold(db, { name: 'My Household', roles: { [user.uid]: 'owner' } });
     await addCatsToHousehold(db, householdId, [{ name: 'Yoda' }]);
   });
-
-  const household = (await fetchOwnedHousehold(db, user))[0]
-  fetchHouseholdName(household.name ?? 'My household');
-  const cat = (await fetchCatsOfHousehold(db, household.id))[0];
 
   async function fetchHouseholdName(householdName: string) {
     const householdNameElement = document.querySelector<HTMLHeadingElement>('#householdName')!;
@@ -77,18 +77,9 @@ async function onUserSignedIn(user: User) {
   }
 
 
-  async function setLastChanged(element: HTMLSpanElement) {
-    try {
-      const idToken = await user.getIdToken();
-      const result = await (await fetch('https://us-central1-cat-litter-tracker-app.cloudfunctions.net/app/lastChanged', {
-        headers: {
-          'Authorization': 'Bearer ' + idToken
-        },
-      })).json();
-      element.textContent = result.data.lastChanged ? new Date(result.data.lastChanged).toLocaleString() : 'Not yet changed';
-    } catch (error) {
-      console.error(error);
-    }
+  async function setLastChanged(cat: DocumentReference, element: HTMLSpanElement) {
+      const litterEvent = (await fetchMostRecentLitterEvents(cat))[0];
+      element.textContent = litterEvent.timestamp ? new Date(litterEvent.timestamp).toLocaleString() : 'Not yet changed';
   }
 
   function setupChangeLitter(buttonElement: HTMLButtonElement, lastChangedElement: HTMLSpanElement, loaderElement: HTMLDivElement) {
@@ -97,7 +88,7 @@ async function onUserSignedIn(user: User) {
       loaderElement.style.display = 'block';
       try {
         await addLitterEvent(cat, { name: 'changed litter' });
-        await setLastChanged(lastChangedElement);
+        await setLastChanged(cat, lastChangedElement);
       } catch (error) {
         console.error(error);
       } finally {

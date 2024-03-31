@@ -1,5 +1,5 @@
 import { User } from "firebase/auth";
-import { DocumentData, DocumentReference, Firestore, collection, doc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { DocumentData, DocumentReference, Firestore, collection, doc, getDocs, limit, orderBy, query, setDoc, where } from "firebase/firestore";
 
 // Household API
 
@@ -32,7 +32,7 @@ export async function addHousehold(db: Firestore, household: { name: string, rol
 export async function fetchCatsOfHousehold(db: Firestore, householdId: string): Promise<DocumentReference[]> {
     const catsCollection = collection(db, `households/${householdId}/cats`);
     const querySnapshot = await getDocs(catsCollection);
-    const cats:  DocumentReference[] = [];
+    const cats: DocumentReference[] = [];
     querySnapshot.forEach((doc) => {
         const catData = doc.ref;
         cats.push(catData);
@@ -41,7 +41,7 @@ export async function fetchCatsOfHousehold(db: Firestore, householdId: string): 
     return cats;
 }
 
-export async function addCatsToHousehold(db: Firestore, householdId: string, cats: { name: string }[]): Promise<DocumentReference[]>{
+export async function addCatsToHousehold(db: Firestore, householdId: string, cats: { name: string }[]): Promise<DocumentReference[]> {
     const catsCollection = collection(db, `households/${householdId}/cats`);
     const newCatDocs: DocumentReference<DocumentData, DocumentData>[] = [];
     for (const cat of cats) {
@@ -69,4 +69,15 @@ export async function addLitterEvent(catRef: DocumentReference, event: { name: s
     } catch (error) {
         console.error("Error adding litter event to Firestore: ", error);
     }
+}
+
+export async function fetchMostRecentLitterEvents(catRef: DocumentReference): Promise<{ name: string; timestamp: string }[]> {
+    const litterEventsCollection = collection(catRef, "litterEvents");
+    const querySnapshot = await getDocs(query(litterEventsCollection, orderBy("timestamp", "desc"), limit(1)));
+    const litterEvents: { name: string; timestamp: string }[] = [];
+    querySnapshot.forEach((doc) => {
+        const litterEventData = doc.data();
+        litterEvents.push({ name: litterEventData.name, timestamp: litterEventData.timestamp });
+    });
+    console.log("Most recent litter events: ", litterEvents); return litterEvents;
 }
