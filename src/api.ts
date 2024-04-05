@@ -2,8 +2,9 @@ import { User } from "firebase/auth";
 import { DocumentData, DocumentReference, Firestore, collection, doc, getDocs, limit, orderBy, query, setDoc, where } from "firebase/firestore";
 
 // Household API
+export type Household = { id: string; name?: string }
 
-export async function fetchOwnedHousehold(db: Firestore, user: User): Promise<{ id: string; name?: string }[]> {
+export async function fetchOwnedHousehold(db: Firestore, user: User): Promise<Household[]> {
     const householdsCollection = collection(db, "households");
     const querySnapshot = await getDocs(query(householdsCollection, where(`roles.${user.uid}`, "==", "owner")));
     const ownedHouseholds: { id: string; name?: string }[] = [];
