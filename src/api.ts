@@ -1,12 +1,11 @@
-import { User } from "firebase/auth";
 import { DocumentData, DocumentReference, Firestore, collection, doc, getDocs, limit, orderBy, query, setDoc, where } from "firebase/firestore";
 
 // Household API
 export type Household = { id: string; name?: string }
 
-export async function fetchOwnedHousehold(db: Firestore, user: User): Promise<Household[]> {
+export async function fetchOwnedHousehold(db: Firestore, userId: string): Promise<Household[]> {
     const householdsCollection = collection(db, "households");
-    const querySnapshot = await getDocs(query(householdsCollection, where(`roles.${user.uid}`, "==", "owner")));
+    const querySnapshot = await getDocs(query(householdsCollection, where(`roles.${userId}`, "==", "owner")));
     const ownedHouseholds: { id: string; name?: string }[] = [];
     querySnapshot.forEach((doc) => {
         const householdData = doc.data();
@@ -60,9 +59,9 @@ export async function addCatsToHousehold(db: Firestore, householdId: string, cat
 
 // Litter API
 
-export async function addLitterEvent(catRef: DocumentReference, event: { name: string }) {
+export async function addLitterEvent(db: Firestore,  householdId: string, catId: string, event: { name: string }) {
     const currentTime = new Date().toISOString();
-    const litterEventsCollection = collection(catRef, "litterEvents");
+    const litterEventsCollection = collection(db, `households/${householdId}/cats/${catId}/litterEvents`);
     const newLitterEventDoc = doc(litterEventsCollection);
     try {
         await setDoc(newLitterEventDoc, { name: event.name, timestamp: currentTime });
@@ -72,8 +71,8 @@ export async function addLitterEvent(catRef: DocumentReference, event: { name: s
     }
 }
 
-export async function fetchMostRecentLitterEvents(catRef: DocumentReference): Promise<{ name: string; timestamp: string }[]> {
-    const litterEventsCollection = collection(catRef, "litterEvents");
+export async function fetchMostRecentLitterEvents(db: Firestore,  householdId: string, catId: string): Promise<{ name: string; timestamp: string }[]> {
+    const litterEventsCollection = collection(db, `households/${householdId}/cats/${catId}/litterEvents`);
     const querySnapshot = await getDocs(query(litterEventsCollection, orderBy("timestamp", "desc"), limit(1)));
     const litterEvents: { name: string; timestamp: string }[] = [];
     querySnapshot.forEach((doc) => {

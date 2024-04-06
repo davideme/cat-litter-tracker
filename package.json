@@ -10,6 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.29.0",
+    "@tanstack/react-query-devtools": "^5.29.0",
     "cors": "^2.8.5",
     "firebase": "^10.9.0",
     "firebaseui": "^6.1.0",
