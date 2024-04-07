@@ -1,7 +1,13 @@
-import { Cat, addLitterEvent, fetchMostRecentLitterEvents } from "../api";
+import {
+  Cat,
+  addLitterEvent,
+  fetchMostRecentLitterEvents,
+  updateCat,
+} from "../api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { db, queryClient } from "../firebase";
 import LitterEvents from "./LitterEvents";
+import { useState } from "react";
 
 function CatComponent({
   householdId,
@@ -10,10 +16,21 @@ function CatComponent({
   householdId?: string;
   getCat: (householdId: string) => Promise<Cat | undefined>;
 }) {
+  const [isEditing, setIsEditing] = useState(false);
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["catByHouseholdId", householdId],
     queryFn: () => getCat(householdId!),
     enabled: !!householdId,
+  });
+  const catMutation = useMutation({
+    mutationFn: async (cat: Cat) => {
+      return await updateCat(db, householdId!, cat.id, { name: cat.name! });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["catByHouseholdId"],
+      });
+    },
   });
   const mutation = useMutation({
     mutationFn: async () => {
@@ -51,9 +68,31 @@ function CatComponent({
     );
   }
 
+  function handleEdit(): void {
+    setIsEditing(true);
+  }
+
+  function handleSave(
+    event: React.FocusEvent<HTMLHeadingElement, Element>
+  ): void {
+    setIsEditing(false);
+    const newName = event.target.textContent;
+    if (!newName) {
+      return;
+    }
+    catMutation.mutate({ id: data?.id!, name: newName });
+  }
+
   return (
     <>
-      <h3>{data?.name || "Luna"}</h3>
+      <h3
+        onClick={handleEdit}
+        contentEditable={isEditing}
+        suppressContentEditableWarning={isEditing}
+        onBlur={handleSave}
+      >
+        {data?.name || "Luna"}
+      </h3>
       <button
         id="changeLitter"
         onClick={() => mutation.mutate()}

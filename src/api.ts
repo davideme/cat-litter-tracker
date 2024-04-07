@@ -96,6 +96,18 @@ export async function addCatsToHousehold(
   return newCatDocs;
 }
 
+export async function updateCat(
+  db: Firestore,
+  householdId: string,
+  catId: string,
+  cat: { name: string }
+): Promise<void> {
+  const householdDoc = doc(db, `households/${householdId}/cats/${catId}`);
+  return await updateDoc(householdDoc, {
+    name: cat.name,
+  });
+}
+
 // Litter API
 
 export async function addLitterEvent(

@@ -17,7 +17,6 @@ function UserDashboard({
     queryKey: ["householdByUserId", user.uid],
     queryFn: () => getHousehold(user.uid),
   });
-
   const mutation = useMutation({
     mutationFn: async (household: Household) => {
       return await updateHousehold(db, household.id, { name: household.name! });
