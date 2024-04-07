@@ -1,5 +1,6 @@
 import {
   Cat,
+  LitterEvent,
   addLitterEvent,
   fetchMostRecentLitterEvents,
   updateCat,
@@ -48,8 +49,8 @@ function CatComponent({
   async function loadLitterEvents(
     householdId: string,
     catId: string
-  ): Promise<{ name: string; timestamp: string } | undefined> {
-    return (await fetchMostRecentLitterEvents(householdId, catId))[0];
+  ): Promise<LitterEvent[]> {
+    return await fetchMostRecentLitterEvents(householdId, catId);
   }
 
   if (isPending) {

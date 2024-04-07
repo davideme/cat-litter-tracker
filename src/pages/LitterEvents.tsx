@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { LitterEvent } from "../api";
 
 function LitterEvents({
   householdId,
@@ -10,7 +11,7 @@ function LitterEvents({
   getLitterEvent: (
     householdId: string,
     catId: string
-  ) => Promise<{ name: string; timestamp: string } | undefined>;
+  ) => Promise<LitterEvent[]>;
 }) {
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["litterEventByHouseholdIdAndCatId", householdId, catId],
@@ -34,15 +35,28 @@ function LitterEvents({
     );
   }
 
+  const listItems = data?.map((litterEvent) => (
+    <li key={litterEvent.id}>
+      {litterEvent?.name}{" "}
+      {litterEvent?.timestamp &&
+        new Date(litterEvent.timestamp).toLocaleString()}
+    </li>
+  ));
+
+  const lastChanged = data && data[0];
+
   return (
-    <p>
-      Last changed:{" "}
-      <span id="lastChanged">
-        {data?.timestamp
-          ? new Date(data.timestamp).toLocaleString()
-          : "Not yet changed"}
-      </span>
-    </p>
+    <>
+      <p>
+        Last changed:{" "}
+        <span id="lastChanged">
+          {lastChanged?.timestamp
+            ? new Date(lastChanged.timestamp).toLocaleString()
+            : "Not yet changed"}
+        </span>
+      </p>
+      <ul>{listItems}</ul>
+    </>
   );
 }
 

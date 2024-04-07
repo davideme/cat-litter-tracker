@@ -1,7 +1,6 @@
 import {
   DocumentData,
   DocumentReference,
-  Firestore,
   collection,
   doc,
   getDocs,
@@ -128,25 +127,22 @@ export async function addLitterEvent(
   }
 }
 
+export type LitterEvent = { id: string; name?: string; timestamp?: string };
+
 export async function fetchMostRecentLitterEvents(
   householdId: string,
   catId: string
-): Promise<{ name: string; timestamp: string }[]> {
+): Promise<LitterEvent[]> {
   const litterEventsCollection = collection(
     db,
     `households/${householdId}/cats/${catId}/litterEvents`
   );
   const querySnapshot = await getDocs(
-    query(litterEventsCollection, orderBy("timestamp", "desc"), limit(1))
+    query(litterEventsCollection, orderBy("timestamp", "desc"))
   );
-  const litterEvents: { name: string; timestamp: string }[] = [];
+  const litterEvents: LitterEvent[] = [];
   querySnapshot.forEach((doc) => {
-    const litterEventData = doc.data();
-    litterEvents.push({
-      name: litterEventData.name,
-      timestamp: litterEventData.timestamp,
-    });
+    litterEvents.push({ id: doc.id, ...doc.data() });
   });
-  console.log("Most recent litter events: ", litterEvents);
   return litterEvents;
 }
