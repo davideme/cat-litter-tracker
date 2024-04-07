@@ -12,12 +12,12 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
+import { db } from "./firebase";
 
 // Household API
 export type Household = { id: string; name?: string };
 
 export async function fetchOwnedHousehold(
-  db: Firestore,
   userId: string
 ): Promise<Household[]> {
   const householdsCollection = collection(db, "households");
@@ -33,10 +33,10 @@ export async function fetchOwnedHousehold(
   return ownedHouseholds;
 }
 
-export async function addHousehold(
-  db: Firestore,
-  household: { name: string; roles: { [userId: string]: string } }
-): Promise<string> {
+export async function addHousehold(household: {
+  name: string;
+  roles: { [userId: string]: string };
+}): Promise<string> {
   const householdsCollection = collection(db, "households");
   const newHouseholdDoc = doc(householdsCollection);
   try {
@@ -49,7 +49,6 @@ export async function addHousehold(
 }
 
 export async function updateHousehold(
-  db: Firestore,
   householdId: string,
   household: { name: string }
 ): Promise<void> {
@@ -64,7 +63,6 @@ export async function updateHousehold(
 export type Cat = { id: string; name?: string };
 
 export async function fetchCatsOfHousehold(
-  db: Firestore,
   householdId: string
 ): Promise<Cat[]> {
   const catsCollection = collection(db, `households/${householdId}/cats`);
@@ -77,7 +75,6 @@ export async function fetchCatsOfHousehold(
 }
 
 export async function addCatsToHousehold(
-  db: Firestore,
   householdId: string,
   cats: { name: string }[]
 ): Promise<DocumentReference[]> {
@@ -97,7 +94,6 @@ export async function addCatsToHousehold(
 }
 
 export async function updateCat(
-  db: Firestore,
   householdId: string,
   catId: string,
   cat: { name: string }
@@ -111,7 +107,6 @@ export async function updateCat(
 // Litter API
 
 export async function addLitterEvent(
-  db: Firestore,
   householdId: string,
   catId: string,
   event: { name: string }
@@ -134,7 +129,6 @@ export async function addLitterEvent(
 }
 
 export async function fetchMostRecentLitterEvents(
-  db: Firestore,
   householdId: string,
   catId: string
 ): Promise<{ name: string; timestamp: string }[]> {

@@ -8,7 +8,7 @@ import {
 } from "../api";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useEffect } from "react";
-import { auth, db } from "../firebase";
+import { auth } from "../firebase";
 import UserDashboard from "./UserDashboard";
 
 const CurrentUser = () => {
@@ -27,14 +27,14 @@ const CurrentUser = () => {
   }, [user, loading, error]);
 
   async function loadHousehold(userId: string): Promise<Household | undefined> {
-    const household = (await fetchOwnedHousehold(db, userId))[0];
+    const household = (await fetchOwnedHousehold(userId))[0];
     if (!household) {
-      const householdId = await addHousehold(db, {
+      const householdId = await addHousehold({
         name: "My Household",
         roles: { [userId]: "owner" },
       });
-      await addCatsToHousehold(db, householdId, [{ name: "Yoda" }]);
-      return (await fetchOwnedHousehold(db, userId))[0];
+      await addCatsToHousehold(householdId, [{ name: "Yoda" }]);
+      return (await fetchOwnedHousehold(userId))[0];
     }
     return household;
   }

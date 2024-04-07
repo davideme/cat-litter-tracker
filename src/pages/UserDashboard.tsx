@@ -1,7 +1,7 @@
 import { User } from "firebase/auth";
 import { Cat, Household, fetchCatsOfHousehold, updateHousehold } from "../api";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { db, queryClient } from "../firebase";
+import { queryClient } from "../firebase";
 import CatComponent from "./CatComponent";
 import { useState } from "react";
 
@@ -19,7 +19,7 @@ function UserDashboard({
   });
   const mutation = useMutation({
     mutationFn: async (household: Household) => {
-      return await updateHousehold(db, household.id, { name: household.name! });
+      return await updateHousehold(household.id, { name: household.name! });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -29,7 +29,7 @@ function UserDashboard({
   });
 
   async function loadCat(householdId: string): Promise<Cat | undefined> {
-    return (await fetchCatsOfHousehold(db, householdId))[0];
+    return (await fetchCatsOfHousehold(householdId))[0];
   }
 
   if (isPending) {

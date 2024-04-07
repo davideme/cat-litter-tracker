@@ -5,7 +5,7 @@ import {
   updateCat,
 } from "../api";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { db, queryClient } from "../firebase";
+import { queryClient } from "../firebase";
 import LitterEvents from "./LitterEvents";
 import { useState } from "react";
 
@@ -24,7 +24,7 @@ function CatComponent({
   });
   const catMutation = useMutation({
     mutationFn: async (cat: Cat) => {
-      return await updateCat(db, householdId!, cat.id, { name: cat.name! });
+      return await updateCat(householdId!, cat.id, { name: cat.name! });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -34,7 +34,7 @@ function CatComponent({
   });
   const mutation = useMutation({
     mutationFn: async () => {
-      return await addLitterEvent(db, householdId!, data?.id!, {
+      return await addLitterEvent(householdId!, data?.id!, {
         name: "changed litter",
       });
     },
@@ -49,7 +49,7 @@ function CatComponent({
     householdId: string,
     catId: string
   ): Promise<{ name: string; timestamp: string } | undefined> {
-    return (await fetchMostRecentLitterEvents(db, householdId, catId))[0];
+    return (await fetchMostRecentLitterEvents(householdId, catId))[0];
   }
 
   if (isPending) {
