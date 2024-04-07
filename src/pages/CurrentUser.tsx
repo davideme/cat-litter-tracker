@@ -30,10 +30,9 @@ const CurrentUser = () => {
     const household = (await fetchOwnedHousehold(userId))[0];
     if (!household) {
       const householdId = await addHousehold({
-        name: "My Household",
         roles: { [userId]: "owner" },
       });
-      await addCatsToHousehold(householdId, [{ name: "Yoda" }]);
+      await addCatsToHousehold(householdId, [{}]);
       return (await fetchOwnedHousehold(userId))[0];
     }
     return household;

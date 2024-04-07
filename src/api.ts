@@ -4,7 +4,6 @@ import {
   collection,
   doc,
   getDocs,
-  limit,
   orderBy,
   query,
   setDoc,
@@ -13,37 +12,34 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 
+type Ref = { id: string };
+
 // Household API
-export type Household = { id: string; name?: string };
+export type Household = { name?: string };
 
 export async function fetchOwnedHousehold(
   userId: string
-): Promise<Household[]> {
+): Promise<(Ref & Household)[]> {
   const householdsCollection = collection(db, "households");
   const querySnapshot = await getDocs(
     query(householdsCollection, where(`roles.${userId}`, "==", "owner"))
   );
-  const ownedHouseholds: { id: string; name?: string }[] = [];
+  const ownedHouseholds: (Ref & Household)[] = [];
   querySnapshot.forEach((doc) => {
-    const householdData = doc.data();
-    ownedHouseholds.push({ id: doc.id, ...householdData });
+    ownedHouseholds.push({ id: doc.id, ...doc.data() });
   });
   console.log("Owned households: ", ownedHouseholds);
   return ownedHouseholds;
 }
 
-export async function addHousehold(household: {
-  name: string;
-  roles: { [userId: string]: string };
-}): Promise<string> {
+export async function addHousehold(
+  householdWithRoles: Household & {
+    roles: { [userId: string]: string };
+  }
+): Promise<string> {
   const householdsCollection = collection(db, "households");
   const newHouseholdDoc = doc(householdsCollection);
-  try {
-    await setDoc(newHouseholdDoc, household);
-    console.log("Household added to Firestore");
-  } catch (error) {
-    console.error("Error adding household to Firestore: ", error);
-  }
+  await setDoc(newHouseholdDoc, householdWithRoles);
   return newHouseholdDoc.id;
 }
 
@@ -59,14 +55,14 @@ export async function updateHousehold(
 
 // Cat API
 
-export type Cat = { id: string; name?: string };
+export type Cat = { name?: string };
 
 export async function fetchCatsOfHousehold(
   householdId: string
-): Promise<Cat[]> {
+): Promise<(Ref & Cat)[]> {
   const catsCollection = collection(db, `households/${householdId}/cats`);
   const querySnapshot = await getDocs(catsCollection);
-  const cats: Cat[] = [];
+  const cats: (Ref & Cat)[] = [];
   querySnapshot.forEach((doc) => {
     cats.push({ id: doc.id, ...doc.data() });
   });
@@ -75,19 +71,14 @@ export async function fetchCatsOfHousehold(
 
 export async function addCatsToHousehold(
   householdId: string,
-  cats: { name: string }[]
+  cats: Cat[]
 ): Promise<DocumentReference[]> {
   const catsCollection = collection(db, `households/${householdId}/cats`);
   const newCatDocs: DocumentReference<DocumentData, DocumentData>[] = [];
   for (const cat of cats) {
     const newCatDoc = doc(catsCollection);
-    try {
-      await setDoc(newCatDoc, cat);
-      newCatDocs.push(newCatDoc);
-      console.log("Cat added to Firestore");
-    } catch (error) {
-      console.error("Error adding cat to Firestore: ", error);
-    }
+    await setDoc(newCatDoc, cat);
+    newCatDocs.push(newCatDoc);
   }
   return newCatDocs;
 }
@@ -116,15 +107,10 @@ export async function addLitterEvent(
     `households/${householdId}/cats/${catId}/litterEvents`
   );
   const newLitterEventDoc = doc(litterEventsCollection);
-  try {
-    await setDoc(newLitterEventDoc, {
-      name: event.name,
-      timestamp: currentTime,
-    });
-    console.log("Litter event added to Firestore");
-  } catch (error) {
-    console.error("Error adding litter event to Firestore: ", error);
-  }
+  return await setDoc(newLitterEventDoc, {
+    name: event.name,
+    timestamp: currentTime,
+  });
 }
 
 export type LitterEvent = { id: string; name?: string; timestamp?: string };
