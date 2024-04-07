@@ -49,16 +49,17 @@ export async function addHousehold(
 
 // Cat API
 
+export type Cat = { id: string; name?: string };
+
 export async function fetchCatsOfHousehold(
   db: Firestore,
   householdId: string
-): Promise<DocumentReference[]> {
+): Promise<Cat[]> {
   const catsCollection = collection(db, `households/${householdId}/cats`);
   const querySnapshot = await getDocs(catsCollection);
-  const cats: DocumentReference[] = [];
+  const cats: Cat[] = [];
   querySnapshot.forEach((doc) => {
-    const catData = doc.ref;
-    cats.push(catData);
+    cats.push({ id: doc.id, ...doc.data() });
   });
   return cats;
 }

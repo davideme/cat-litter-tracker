@@ -1,9 +1,8 @@
 import { User } from "firebase/auth";
-import { DocumentReference } from "firebase/firestore";
-import { Household, fetchCatsOfHousehold } from "../api";
+import { Cat, Household, fetchCatsOfHousehold } from "../api";
 import { useQuery } from "@tanstack/react-query";
 import { db } from "../firebase";
-import Cat from "./Cat";
+import CatComponent from "./CatComponent";
 
 function UserDashboard({
   user,
@@ -17,9 +16,7 @@ function UserDashboard({
     queryFn: () => getHousehold(user.uid),
   });
 
-  async function loadCat(
-    householdId: string
-  ): Promise<DocumentReference | undefined> {
+  async function loadCat(householdId: string): Promise<Cat | undefined> {
     return (await fetchCatsOfHousehold(db, householdId))[0];
   }
 
@@ -41,8 +38,8 @@ function UserDashboard({
 
   return (
     <>
-      <h2 id="householdName">{data ? data.name : "My household"}</h2>
-      <Cat householdId={data?.id} getCat={loadCat} />
+      <h2 id="householdName">{data?.name || "The Cat Palace"}</h2>
+      <CatComponent householdId={data?.id} getCat={loadCat} />
     </>
   );
 }

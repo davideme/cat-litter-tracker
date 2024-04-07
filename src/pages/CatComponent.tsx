@@ -1,15 +1,15 @@
-import { DocumentReference } from "firebase/firestore";
-import { addLitterEvent, fetchMostRecentLitterEvents } from "../api";
+import { Cat, addLitterEvent, fetchMostRecentLitterEvents } from "../api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { db, queryClient } from "../firebase";
+import LitterEvents from "./LitterEvents";
 
-function Cat({
+function CatComponent({
   householdId,
   getCat,
 }: {
   litterEvent?: { name: string; timestamp: string };
   householdId?: string;
-  getCat: (householdId: string) => Promise<DocumentReference | undefined>;
+  getCat: (householdId: string) => Promise<Cat | undefined>;
 }) {
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["catByHouseholdId", householdId],
@@ -54,6 +54,7 @@ function Cat({
 
   return (
     <>
+      <h3>{data?.name || "Luna"}</h3>
       <button
         id="changeLitter"
         onClick={() => mutation.mutate()}
@@ -73,50 +74,4 @@ function Cat({
   );
 }
 
-export default Cat;
-
-function LitterEvents({
-  householdId,
-  catId,
-  getLitterEvent,
-}: {
-  householdId?: string;
-  catId?: string;
-  getLitterEvent: (
-    householdId: string,
-    catId: string
-  ) => Promise<{ name: string; timestamp: string } | undefined>;
-}) {
-  const { isPending, isError, data, error } = useQuery({
-    queryKey: ["litterEventByHouseholdIdAndCatId", householdId, catId],
-    queryFn: () => getLitterEvent(householdId!, catId!),
-    enabled: !!catId,
-  });
-
-  if (isPending) {
-    return (
-      <div>
-        <p>Loading...</p>
-      </div>
-    );
-  }
-
-  if (isError && data !== undefined) {
-    return (
-      <div>
-        <p>Error: {error.message}</p>
-      </div>
-    );
-  }
-
-  return (
-    <p>
-      Last changed:{" "}
-      <span id="lastChanged">
-        {data?.timestamp
-          ? new Date(data.timestamp).toLocaleString()
-          : "Not yet changed"}
-      </span>
-    </p>
-  );
-}
+export default CatComponent;
