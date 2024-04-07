@@ -9,6 +9,7 @@ import {
   orderBy,
   query,
   setDoc,
+  updateDoc,
   where,
 } from "firebase/firestore";
 
@@ -45,6 +46,17 @@ export async function addHousehold(
     console.error("Error adding household to Firestore: ", error);
   }
   return newHouseholdDoc.id;
+}
+
+export async function updateHousehold(
+  db: Firestore,
+  householdId: string,
+  household: { name: string }
+): Promise<void> {
+  const householdDoc = doc(db, `households/${householdId}`);
+  return await updateDoc(householdDoc, {
+    name: household.name,
+  });
 }
 
 // Cat API

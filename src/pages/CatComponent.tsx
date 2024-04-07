@@ -7,7 +7,6 @@ function CatComponent({
   householdId,
   getCat,
 }: {
-  litterEvent?: { name: string; timestamp: string };
   householdId?: string;
   getCat: (householdId: string) => Promise<Cat | undefined>;
 }) {
