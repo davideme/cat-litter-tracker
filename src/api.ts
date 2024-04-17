@@ -12,7 +12,7 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 
-type Ref = { id: string };
+export type Ref = { id: string };
 
 // Household API
 export type Household = { name?: string };
@@ -55,7 +55,7 @@ export async function updateHousehold(
 
 // Cat API
 
-export type Cat = { name?: string };
+export type Cat = { name?: string; litterType?: string };
 
 export async function fetchCatsOfHousehold(
   householdId: string
@@ -86,12 +86,10 @@ export async function addCatsToHousehold(
 export async function updateCat(
   householdId: string,
   catId: string,
-  cat: { name: string }
+  cat: Cat
 ): Promise<void> {
   const householdDoc = doc(db, `households/${householdId}/cats/${catId}`);
-  return await updateDoc(householdDoc, {
-    name: cat.name,
-  });
+  return await updateDoc(householdDoc, cat);
 }
 
 // Litter API

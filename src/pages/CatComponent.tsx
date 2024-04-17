@@ -1,6 +1,7 @@
 import {
   Cat,
   LitterEvent,
+  Ref,
   addLitterEvent,
   fetchMostRecentLitterEvents,
   updateCat,
@@ -15,17 +16,18 @@ function CatComponent({
   getCat,
 }: {
   householdId?: string;
-  getCat: (householdId: string) => Promise<Cat | undefined>;
+  getCat: (householdId: string) => Promise<Ref & Cat>;
 }) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [isEditingLitter, setIsEditingLitter] = useState(false);
   const { isPending, isError, data, error } = useQuery({
     queryKey: ["catByHouseholdId", householdId],
     queryFn: () => getCat(householdId!),
     enabled: !!householdId,
   });
   const catMutation = useMutation({
-    mutationFn: async (cat: Cat) => {
-      return await updateCat(householdId!, cat.id, { name: cat.name! });
+    mutationFn: async (catRef: Ref & Cat) => {
+      return await updateCat(householdId!, catRef.id, catRef);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -70,13 +72,13 @@ function CatComponent({
   }
 
   function handleEdit(): void {
-    setIsEditing(true);
+    setIsEditingName(true);
   }
 
   function handleSave(
     event: React.FocusEvent<HTMLHeadingElement, Element>
   ): void {
-    setIsEditing(false);
+    setIsEditingName(false);
     const newName = event.target.textContent;
     if (!newName) {
       return;
@@ -84,16 +86,63 @@ function CatComponent({
     catMutation.mutate({ id: data?.id!, name: newName });
   }
 
+  function handleLitterTypeClick(): void {
+    setIsEditingLitter(true);
+  }
+
+  function handleSaveLitterType(
+    event: React.FocusEvent<HTMLSelectElement, Element>
+  ): void {
+    setIsEditingLitter(false);
+    const newLitterType = event.target.value;
+    if (!newLitterType) {
+      return;
+    }
+    catMutation.mutate({ id: data?.id!, litterType: newLitterType });
+  }
+
   return (
     <>
       <h3
         onClick={handleEdit}
-        contentEditable={isEditing}
-        suppressContentEditableWarning={isEditing}
+        contentEditable={isEditingName}
+        suppressContentEditableWarning={isEditingName}
         onBlur={handleSave}
       >
         {data?.name || "Luna"}
       </h3>
+      <div
+        style={{
+          display: "inline-block",
+          position: "relative",
+        }}
+      >
+        {isEditingLitter ? (
+          <select
+            defaultValue={data?.litterType}
+            onBlur={handleSaveLitterType}
+            style={{
+              display: "inline-block",
+              cursor: "pointer",
+            }}
+          >
+            <option value="">Select Litter Type</option>
+            <option value="Clay">Clay</option>
+            <option value="Silica">Silica</option>
+            <option value="Pine">Pine</option>
+            <option value="Corn">Corn</option>
+          </select>
+        ) : (
+          <span
+            style={{
+              cursor: "pointer",
+            }}
+            onClick={handleLitterTypeClick}
+          >
+            {data?.litterType ?? "Clay"}
+          </span>
+        )}
+      </div>
       <button
         id="changeLitter"
         onClick={() => mutation.mutate()}

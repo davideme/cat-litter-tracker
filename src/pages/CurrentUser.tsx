@@ -2,6 +2,7 @@ import firebase from "firebase/compat/app";
 import * as firebaseui from "firebaseui";
 import {
   Household,
+  Ref,
   addCatsToHousehold,
   addHousehold,
   fetchOwnedHousehold,
@@ -26,7 +27,7 @@ const CurrentUser = () => {
     });
   }, [user, loading, error]);
 
-  async function loadHousehold(userId: string): Promise<Household | undefined> {
+  async function loadHousehold(userId: string): Promise<Ref & Household> {
     const household = (await fetchOwnedHousehold(userId))[0];
     if (!household) {
       const householdId = await addHousehold({

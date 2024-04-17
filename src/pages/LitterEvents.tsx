@@ -35,13 +35,13 @@ function LitterEvents({
     );
   }
 
-  const listItems = data?.map((litterEvent) => (
-    <li key={litterEvent.id}>
-      {litterEvent?.name}{" "}
-      {litterEvent?.timestamp &&
-        new Date(litterEvent.timestamp).toLocaleString()}
-    </li>
-  ));
+  // const listItems = data?.map((litterEvent) => (
+  //   <li key={litterEvent.id}>
+  //     {litterEvent?.name}{" "}
+  //     {litterEvent?.timestamp &&
+  //       new Date(litterEvent.timestamp).toLocaleString()}
+  //   </li>
+  // ));
 
   const lastChanged = data && data[0];
 
@@ -55,7 +55,7 @@ function LitterEvents({
             : "Not yet changed"}
         </span>
       </p>
-      <ul>{listItems}</ul>
+      {/* <ul>{listItems}</ul> */}
     </>
   );
 }
